@@ -1,0 +1,33 @@
+// Package declaration (like C++ namespace)
+package commonapi.telemetry
+
+// Interface definition
+interface TelemetryService {
+    version { major 1 minor 0 }
+    
+    // Method: request/response pattern
+    method getLoad {
+        in {
+            SourceType source    // Input parameter
+        }
+        out {
+            Float loadValue      // Output parameter
+            Boolean success      // Was the read successful?
+        }
+    }
+    
+    // Enumeration type
+    enumeration SourceType {
+        CPU = 0
+        RAM = 1
+        GPU = 2
+    }
+    
+    // Broadcast: event pattern (for mega bonus)
+    broadcast telemetryUpdate {
+        out {
+            SourceType source
+            Float loadValue
+        }
+    }
+}

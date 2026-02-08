@@ -11,8 +11,11 @@ cc_library(
         "SafeSocket.hpp",
         "SocketTelemetrySourceImpl.hpp",
         "TelemetryParser.hpp",
+        # Phase 5: vSOME/IP Telemetry
+        "SomeIPTelemetryClient.hpp",
+        "SomeIPTelemetrySourceImpl.hpp",
     ],
     include_prefix = "",
     strip_include_prefix = "",
-    includes = ["."],  # Adds inc/logging to include path
+    includes = ["."],  # Adds inc/SmartDataHub to include path
 )

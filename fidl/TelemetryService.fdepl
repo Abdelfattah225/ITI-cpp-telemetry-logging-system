@@ -1,0 +1,25 @@
+import "platform:/plugin/org.genivi.commonapi.someip/deployment/CommonAPI-4-SOMEIP_deployment_spec.fdepl"
+import "TelemetryService.fidl"
+
+define org.genivi.commonapi.someip.deployment for interface commonapi.telemetry.TelemetryService {
+    SomeIpServiceID = 0x1234          // Unique service identifier
+    
+    method getLoad {
+        SomeIpMethodID = 0x0001       // Unique method identifier
+        SomeIpReliable = false         // UDP
+    }
+    
+    broadcast telemetryUpdate {
+        SomeIpEventID = 0x8001        // Event IDs typically start at 0x8000+
+        SomeIpEventGroups = { 0x0001 }
+    }
+}
+
+define org.genivi.commonapi.someip.deployment for provider as Service {
+    instance commonapi.telemetry.TelemetryService {
+        InstanceId = "commonapi.telemetry.TelemetryService"
+        SomeIpInstanceID = 0x0001
+        SomeIpUnicastAddress = "127.0.0.1"
+        SomeIpUnreliableUnicastPort = 30509
+    }
+}

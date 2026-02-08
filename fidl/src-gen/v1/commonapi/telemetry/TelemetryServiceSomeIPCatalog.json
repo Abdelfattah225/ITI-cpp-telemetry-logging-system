@@ -1,0 +1,8 @@
+{
+    "commonapi.telemetry.TelemetryService" : {
+        "service_id": 4660,
+        "instances" : {
+            "commonapi.telemetry.TelemetryService": 1
+        }
+    }
+}

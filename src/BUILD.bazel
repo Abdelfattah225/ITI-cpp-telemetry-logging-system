@@ -70,3 +70,26 @@ cc_library(
         "//inc/AsyncLogging:async_logging_hdrs",
     ],
 )
+
+# ══════════════════════════════════════════════════════════════════════
+# VSOMEIP TELEMETRY (Phase 5)
+# ══════════════════════════════════════════════════════════════════════
+
+cc_library(
+    name = "vsomeip_telemetry",
+    srcs = [
+        "SmartDataHub/SomeIPTelemetryClient.cpp",
+        "SmartDataHub/SomeIPTelemetrySourceImpl.cpp",
+    ],
+    visibility = ["//visibility:public"],
+    copts = ["-I/usr/local/include"],
+    deps = [
+        "//inc/SmartDataHub:smart_data_hub_hdrs",
+    ],
+    linkopts = [
+        "-L/usr/local/lib",
+        "-lvsomeip3",
+        "-lvsomeip3-cfg",
+        "-lpthread",
+    ],
+)

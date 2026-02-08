@@ -11,35 +11,30 @@ A scalable, multi-threaded logging system written in Modern C++17. Designed with
 - ✅ Thread-safe asynchronous logging operations
 - ✅ High-performance ThreadPool for parallel sink writes
 - ✅ RAII-compliant resource management
-- 🔄 SOME/IP integration (Planned)
-- 🔄 DLT logging support (Planned)
+- ✅ SOME/IP integration with vSOME/IP
+- ✅ Runtime Configuration using JSON
+- ✅ Façade Pattern for simplified usage
 
 ## System Overview
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│                           DATA SOURCES (Phase 2)                             │
+│                           DATA SOURCES (Phase 2 & 5)                         │
 │   ┌───────────────┐   ┌───────────────┐   ┌───────────────┐                  │
 │   │ CPU Telemetry │   │ RAM Telemetry │   │ GPU Telemetry │                  │
-│   │   (File)      │   │   (File)      │   │   (Socket)    │                  │
+│   │   (File)      │   │   (File)      │   │   (File)      │                  │
 │   └───────┬───────┘   └───────┬───────┘   └───────┬───────┘                  │
-│           │   
-
-Move to Phase 5 - start SOME/IP integration?
-                │                   │                          │
+│           │                   │                   │                          │
 │           └───────────────────┼───────────────────┘                          │
+│                               │                                              │
+│                               ▼                                              │
+│                        FAÇADE (Phase 6)                                      │
+│                  (TelemetryApp + Configuration)                              │
 │                               │                                              │
 │                               ▼                                              │
 │   ┌──────────────────────────────────────────────────────────────────────┐   │
 │   │                    LOG FORMATTER (Phase 3)                           │   │
 │   │         Policy-based formatting with threshold severity              │   │
-│   │              CpuPolicy | RamPolicy | GpuPolicy                       │   │
-│   └──────────────────────────────┬───────────────────────────────────────┘   │
-│                                  │                                           │
-│                                  ▼                                           │
-│   ┌──────────────────────────────────────────────────────────────────────┐   │
-│   │                      LOG MESSAGE (Phase 1)                           │   │
-│   │           (app_name, context, severity, payload, timestamp)          │   │
 │   └──────────────────────────────┬───────────────────────────────────────┘   │
 │                                  │                                           │
 │                                  ▼                                           │
@@ -47,25 +42,16 @@ Move to Phase 5 - start SOME/IP integration?
 │   │                   ASYNC LOG MANAGER (Phase 4)                        │   │
 │   │   ┌────────────────────────────────────────────────────────────┐     │   │
 │   │   │              ThreadSafeRingBuffer<LogMessage>              │     │   │
-│   │   │    ┌─────────────────────────────────────────────────┐     │     │   │
-│   │   │    │  mutex + condition_variables + RingBuffer       │     │     │   │
-│   │   │    └─────────────────────────────────────────────────┘     │     │   │
 │   │   └────────────────────────────┬───────────────────────────────┘     │   │
 │   │                                │                                     │   │
 │   │                                ▼                                     │   │
-│   │   ┌────────────────────────────────────────────────────────────┐     │   │
-│   │   │                    THREAD POOL                             │     │   │
-│   │   │         (Parallel sink writes for performance)             │     │   │
-│   │   └────────────────────────────┬───────────────────────────────┘     │   │
-│   └────────────────────────────────┼─────────────────────────────────────┘   │
-│                                    │                                         │
-│                    ┌───────────────┼───────────────┐                         │
-│                    │               │               │                         │
-│                    ▼               ▼               ▼                         │
-│              ┌──────────┐    ┌──────────┐    ┌──────────┐                    │
-│              │ Console  │    │   File   │    │  Socket  │                    │
-│              │   Sink   │    │   Sink   │    │   Sink   │                    │
-│              └──────────┘    └──────────┘    └──────────┘                    │
+│   │                    ┌───────────────┼───────────────┐                 │   │
+│   │                    ▼               ▼               ▼                 │   │
+│   │              ┌──────────┐    ┌──────────┐    ┌──────────┐            │   │
+│   │              │ Console  │    │   File   │    │  Socket  │            │   │
+│   │              │   Sink   │    │   Sink   │    │   Sink   │            │   │
+│   │              └──────────┘    └──────────┘    └──────────┘            │   │
+│   └──────────────────────────────────────────────────────────────────────┘   │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -77,10 +63,9 @@ Move to Phase 5 - start SOME/IP integration?
 | [Phase 1](docs/01-Core-Synchronous-Logging-Foundation/README.md) | Core Synchronous Logging Foundation | ✅ Complete |
 | [Phase 2](docs/02-DataSources&SmartResourceManagement/README.md) | Data Sources & Smart Resource Management | ✅ Complete |
 | [Phase 3](docs/03-Formatter&ThresholdLogic/README.md) | Formatter & Threshold Logic | ✅ Complete |
-| [Phase 4](docs/04-Asynchronous-Logging/README.md) | Asynchronous Logging with ThreadPool | ✅ Complete |
-| Phase 5 | Integration with vsomeip and SOME/IP | 🔄 Planned |
-| Phase 6 | DLT (Diagnostic Log and Trace) Integration | 🔄 Planned |
-| Phase 7 | Performance Optimization and Benchmarking | 🔄 Planned |
+| [Phase 4](docs/04-AsyncLogging//README.md) | Asynchronous Logging with ThreadPool | ✅ Complete |
+| [Phase 5](docs/05-Telemetry-Over-Network/README.md) | Telemetry Over Network (vSOME/IP) | ✅ Complete |
+| [Phase 6](docs/06-System-Wrap-Up/README.md) | System Wrap Up (Façade & Configuration) | ✅ Complete |
 
 ## Topics Covered
 
@@ -107,6 +92,7 @@ Move to Phase 5 - start SOME/IP integration?
 | `std::function` & Lambdas | 4 | Callables and task encapsulation |
 | `std::future` & `std::packaged_task` | 4 | Asynchronous return values |
 | Smart Pointers | All | `unique_ptr`, `shared_ptr` |
+| `nlohmann/json` | 6 | Runtime configuration parsing |
 
 ### Design Patterns
 
@@ -118,6 +104,9 @@ Move to Phase 5 - start SOME/IP integration?
 | Concurrency | Producer-Consumer | 4 | Async logging flow |
 | Concurrency | Thread Pool | 4 | Parallel sink writes |
 | Structural | RAII | 2, 4 | Resource management |
+| Creational | Singleton | 5 | vSOME/IP Application Instance |
+| Structural | Adapter | 5 | vSOME/IP Client to ITelemetrySource |
+| Structural | Façade | 6 | TelemetryApp hiding complexity |
 
 ### Design Idioms
 
@@ -135,9 +124,9 @@ Move to Phase 5 - start SOME/IP integration?
 | [GoogleTest](https://github.com/google/googletest) | Unit testing | ✅ Used |
 | [magic_enum](https://github.com/Neargye/magic_enum) | Enum reflection | ✅ Used |
 | [Bazel](https://bazel.build/) | Build system | ✅ Used |
-| [vsomeip](https://github.com/COVESA/vsomeip) | SOME/IP communication | 🔄 Planned |
+| [vsomeip](https://github.com/COVESA/vsomeip) | SOME/IP communication | ✅ Used |
+| [nlohmann/json](https://github.com/nlohmann/json) | JSON Configuration | ✅ Used |
 | [DLT](https://github.com/COVESA/dlt-daemon) | Diagnostic Log and Trace | 🔄 Planned |
-| [CommonAPI](https://github.com/COVESA/capicxx-core-runtime) | IPC abstraction | 🔄 TBD |
 
 ## Project Structure
 
@@ -145,125 +134,34 @@ Move to Phase 5 - start SOME/IP integration?
 ITI_Cpp_LogLog_Project/
 ├── MODULE.bazel
 ├── WORKSPACE
-├── .bazelrc
 ├── README.md
 │
 ├── inc/
-│   ├── logging/                          # Phase 1
-│   │   ├── BUILD.bazel
-│   │   ├── ILogSink.hpp
-│   │   ├── LogMessage.hpp
-│   │   ├── LogManager.hpp
-│   │   ├── ConsoleSinkImpl.hpp
-│   │   └── FileSinkImpl.hpp
-│   │
-│   ├── SmartDataHub/                     # Phase 2
-│   │   ├── BUILD.bazel
-│   │   ├── ITelemetrySource.hpp
-│   │   ├── FileTelemetrySourceImpl.hpp
-│   │   ├── SocketTelemetrySourceImpl.hpp
-│   │   ├── SafeFile.hpp
-│   │   ├── SafeSocket.hpp
-│   │   └── TelemetryParser.hpp
-│   │
-│   ├── Formatter/                        # Phase 3
-│   │   ├── BUILD
-│   │   ├── Enums.hpp
-│   │   ├── Policies.hpp
-│   │   ├── LogFormatter.hpp
-│   │   ├── LogSinkFactory.hpp
-│   │   ├── LogManagerBuilder.hpp
-│   │   ├── Parser.hpp
-│   │   └── magic_enum.hpp
-│   │
-│   └── AsyncLogging/                     # Phase 4
-│       ├── BUILD
-│       ├── RingBuffer.hpp
-│       ├── ThreadSafeRingBuffer.hpp
-│       ├── ThreadPool.hpp
-│       └── AsyncLogManager.hpp
+│   ├── logging/           # Phase 1: Sinks & Core
+│   ├── SmartDataHub/      # Phase 2: Sources & Phase 5: vSOME/IP
+│   ├── Formatter/         # Phase 3: Formatting Policies
+│   ├── AsyncLogging/      # Phase 4: ThreadPool & RingBuffer
+│   └── Facade/            # Phase 6: TelemetryApp & Config
 │
 ├── src/
-│   ├── BUILD.bazel
-│   ├── logging/                          # Phase 1
-│   │   ├── ConsoleSinkImpl.cpp
-│   │   ├── FileSinkImpl.cpp
-│   │   └── LogManager.cpp
-│   │
-│   ├── SmartDataHub/                     # Phase 2
-│   │   ├── FileTelemetrySourceImpl.cpp
-│   │   ├── SocketTelemetrySourceImpl.cpp
-│   │   ├── SafeFile.cpp
-│   │   ├── SafeSocket.cpp
-│   │   └── TelemetryParser.cpp
-│   │
-│   ├── Formatter/                        # Phase 3
-│   │   ├── LogSinkFactory.cpp
-│   │   └── LogManagerBuilder.cpp
-│   │
-│   └── AsyncLogging/                     # Phase 4
-│       ├── ThreadPool.cpp
-│       └── AsyncLogManager.cpp
+│   ├── logging/
+│   ├── SmartDataHub/
+│   ├── Formatter/
+│   ├── AsyncLogging/
+│   └── Facade/
 │
 ├── app/
-│   ├── phase1/
-│   │   ├── BUILD.bazel
-│   │   └── main.cpp
-│   ├── phase2/
-│   │   ├── BUILD.bazel
-│   │   └── main.cpp
-│   ├── phase3/
-│   │   ├── BUILD
-│   │   └── main.cpp
-│   └── phase4/
-│       ├── BUILD
+│   ├── phase1/..phase4/   # Previous phase demos
+│   ├── phase5/            # vSOME/IP Service & Client
+│   └── phase6/            # Main Façade Application
 │       ├── main.cpp
-│       ├── test_threadsafe_buffer.cpp
-│       ├── test_thread_pool.cpp
-│       ├── test_async_log_manager.cpp
-│       └── generate_telemetry.sh
+│       └── config.json
 │
-├── Utest/
-│   ├── phase1/
-│   │   ├── BUILD.bazel
-│   │   ├── LogMessageTest.cpp
-│   │   ├── ConsoleSinkTest.cc
-│   │   ├── FileSinkTest.cc
-│   │   └── LogManagerTest.cc
-│   ├── phase2/
-│   │   ├── BUILD.bazel
-│   │   ├── SafeFileTest.cc
-│   │   ├── SafeSocketTest.cc
-│   │   ├── FileTelemetrySourceImplTest.cc
-│   │   └── SocketTelemetrySourceImplTest.cc
-│   ├── phase3/
-│   │   ├── BUILD
-│   │   ├── Enum_test.cpp
-│   │   ├── Policies_test.cpp
-│   │   ├── LogFormatterTest.cpp
-│   │   ├── LogSinkFactory_test.cpp
-│   │   └── LogManagerBuilderTest.cpp
-│   └── phase4/
-│       ├── BUILD
-│       ├── RingBufferTest.cpp
-│       ├── ThreadSafeRingBufferTest.cpp
-│       ├── ThreadPoolTest.cpp
-│       └── AsyncLogManagerTest.cpp
-│
-└── docs/
-    ├── 01-Core-Synchronous-Logging-Foundation/
-    │   ├── README.md
-    │   └── classes_diagrams.png
-    ├── 02-DataSources&SmartResourceManagement/
-    │   ├── README.md
-    │   └── TelemetrySystem.png
-    ├── 03-Formatter&ThresholdLogic/
-    │   ├── README.md
-    │   └── Phase3_Class_Diagram.png
-    └── 04-Asynchronous-Logging/
-        ├── README.md
-        ├── uml.puml
-        
+├── Utest/                 # Unit Tests
+└── docs/                  # Detailed Documentation
+    ├── 01..04-PhaseName/
+    ├── 05-Telemetry-Over-Network/
+    └── 06-System-Wrap-Up/
 ```
 
 ## Phase Highlights
@@ -278,19 +176,25 @@ ITI_Cpp_LogLog_Project/
 - ITelemetrySource interface
 - RAII wrappers: SafeFile, SafeSocket
 - File and Socket telemetry sources
-- Rule of 5 implementation
 
 ### Phase 3: Formatter & Threshold Logic
 - Policy-based LogFormatter template
-- Threshold-based severity inference
 - Factory pattern for sink creation
 - Builder pattern for LogManager
 
 ### Phase 4: Asynchronous Logging
-- RingBuffer<T>: Lock-free circular buffer
-- ThreadSafeRingBuffer<T>: Thread-safe wrapper
 - ThreadPool: Parallel task execution
 - AsyncLogManager: Non-blocking logging
+
+### Phase 5: Telemetry Over Network (vSOME/IP)
+- vSOME/IP Service & Client implementation
+- Adapter pattern for seamless integration
+- Singleton pattern for middleware management
+
+### Phase 6: System Wrap Up
+- Façade pattern (`TelemetryApp`)
+- JSON Runtime Configuration
+- Simplified Application Lifecycle
 
 
 ## Performance Characteristics
@@ -301,17 +205,8 @@ ITI_Cpp_LogLog_Project/
 | RingBuffer push/pop | O(1) | Circular buffer operations |
 | ThreadPool enqueue | O(1) | Amortized, queue insertion |
 | Sink write | O(n) | Parallel via ThreadPool |
-
-## Upcoming Features (Phase 5+)
-
-- [ ] SOME/IP integration with vsomeip
-- [ ] Remote logging capabilities
-- [ ] DLT (Diagnostic Log and Trace) support
-- [ ] Log filtering and routing
-- [ ] Performance benchmarking suite
-- [ ] Configuration file support
+ Performance benchmarking suite
 
 ## Author
 
 **Abdelfattah Moawed**
-

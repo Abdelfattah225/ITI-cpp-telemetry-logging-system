@@ -51,10 +51,15 @@ void signalHandler(int signum) {
 
 // ── Telemetry Readers ─────────────────────────────────────────────────────
 
-float readCpuUsage() {
-    static long long prevTotal = 0, prevIdle = 0;
+// ── Global persistent CPU state ─────────────────────────────────────────
+static long long g_prevTotal = 0;
+static long long g_prevIdle  = 0;
+static float     g_lastCpu   = 0.0f;
+
+
+void updateCpuUsage() {
     std::ifstream f("/proc/stat");
-    if (!f.is_open()) return 0.0f;
+    if (!f.is_open()) return;
 
     std::string line;
     std::getline(f, line);
@@ -65,15 +70,16 @@ float readCpuUsage() {
 
     long long total     = user + nice + system + idle + iowait + irq + softirq + steal;
     long long idleTime  = idle + iowait;
-    long long totalDiff = total    - prevTotal;
-    long long idleDiff  = idleTime - prevIdle;
-    prevTotal = total;
-    prevIdle  = idleTime;
+    long long totalDiff = total    - g_prevTotal;
+    long long idleDiff  = idleTime - g_prevIdle;
+    g_prevTotal = total;
+    g_prevIdle  = idleTime;
 
-    if (totalDiff == 0) return 0.0f;
-    float usage = 100.0f * (1.0f - (float)idleDiff / (float)totalDiff);
-    return std::max(0.0f, std::min(100.0f, usage));
+    if (totalDiff == 0) return;
+    g_lastCpu = 100.0f * (1.0f - (float)idleDiff / (float)totalDiff);
+    g_lastCpu = std::max(0.0f, std::min(100.0f, g_lastCpu));
 }
+
 
 float readRamUsage() {
     std::ifstream f("/proc/meminfo");
@@ -108,23 +114,17 @@ float readCpuTemp() {
  * Reads all 3 metrics and sends back: "CPU:38\nRAM:71\nTEMP:45\n"
  */
 void onMessage(const std::shared_ptr<vsomeip::message>& request) {
-    // Prime extra CPU reading for delta accuracy
-    float cpu  = readCpuUsage();
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
-    cpu = readCpuUsage();
-
+    float cpu  = g_lastCpu;
     float ram  = readRamUsage();
     float temp = readCpuTemp();
 
-    // Build multi-metric payload
     std::string payload =
-        "CPU:"  + std::to_string((int)cpu)  + "\n" +
-        "RAM:"  + std::to_string((int)ram)  + "\n" +
-        "TEMP:" + std::to_string((int)temp) + "\n";
+        "CPU:"  + std::to_string((int)std::round(cpu))  + "\n" +
+        "RAM:"  + std::to_string((int)std::round(ram))  + "\n" +
+        "TEMP:" + std::to_string((int)std::round(temp)) + "\n";
 
     std::cout << "[RPi Service] Responding with: " << payload;
 
-    // Create and send response
     auto runtime         = vsomeip::runtime::get();
     auto response        = runtime->create_response(request);
     auto responsePayload = runtime->create_payload();
@@ -163,15 +163,21 @@ int main() {
     g_app->register_state_handler(onState);
     g_app->register_message_handler(
         TELEMETRY_SERVICE_ID, TELEMETRY_INSTANCE_ID, GET_TELEMETRY_METHOD_ID, onMessage);
-
-    // Prime first CPU reading (delta always 0 on first read)
-    readCpuUsage();
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    // Start background CPU sampler (1s interval for accurate deltas)
+    updateCpuUsage();  // Prime first reading
+    std::thread cpuSampler([]() {
+        while (g_running) {
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            updateCpuUsage();
+        }
+    });
 
     std::cout << "[RPi Service] Running — waiting for client requests...\n";
     g_app->start();  // blocking
 
     // Cleanup
+    g_running = false;
+    if (cpuSampler.joinable()) cpuSampler.join();    // Cleanup
     g_app->stop_offer_service(TELEMETRY_SERVICE_ID, TELEMETRY_INSTANCE_ID);
     g_app->unregister_message_handler(TELEMETRY_SERVICE_ID, TELEMETRY_INSTANCE_ID, GET_TELEMETRY_METHOD_ID);
     g_app->unregister_state_handler();

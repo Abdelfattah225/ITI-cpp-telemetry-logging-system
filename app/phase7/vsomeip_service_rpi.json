@@ -1,30 +1,23 @@
 {
-    "unicast": "10.204.99.245",
-    "logging": {
-        "level": "warning",
-        "console": "false"
-    },
+    "unicast": "192.168.10.2",
+    "logging": { "level": "info" },
     "applications": [
         {
             "name": "TelemetryService",
-            "id": "0x1111"
+            "id": "0x1000"
         }
     ],
+    "routing": "TelemetryService",
     "services": [
         {
             "service": "0x1234",
             "instance": "0x5678",
-            "unreliable": "30509",
-            "reliable": {
-                "port": "30510",
-                "enable-magic-cookies": "false"
-            }
+            "unreliable": "30509"
         }
     ],
-    "routing": "TelemetryService",
     "service-discovery": {
         "enable": "true",
-        "multicast": "224.224.224.245",
+        "multicast": "224.224.224.1",
         "port": "30490",
         "protocol": "udp",
         "initial_delay_min": "10",
@@ -32,6 +25,7 @@
         "repetitions_base_delay": "200",
         "repetitions_max": "3",
         "ttl": "3",
-        "cyclic_offer_delay": "2000"
+        "cyclic_offer_delay": "2000",
+        "request_response_delay": "1500"
     }
 }

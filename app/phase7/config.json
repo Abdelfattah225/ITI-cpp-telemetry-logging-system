@@ -1,0 +1,29 @@
+{
+    "appName": "RPi_System_Monitor",
+    "bufferSize": 256,
+    "threadPoolSize": 4,
+    "logFilePath": "phase7_telemetry.log",
+    "sources": {
+        "CPU": {
+            "enabled": true,
+            "type": "FILE",
+            "path": "/proc/stat",
+            "parseRateMs": 500,
+            "sinks": ["FILE"]
+        },
+        "RAM": {
+            "enabled": true,
+            "type": "FILE",
+            "path": "/proc/meminfo",
+            "parseRateMs": 1000,
+            "sinks": ["FILE"]
+        },
+        "GPU": {
+            "enabled": true,
+            "type": "FILE",
+            "path": "/sys/class/thermal/thermal_zone0/temp",
+            "parseRateMs": 1000,
+            "sinks": ["FILE"]
+        }
+    }
+}

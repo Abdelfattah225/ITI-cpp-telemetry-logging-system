@@ -1,0 +1,16 @@
+{
+    "appName": "RPi_System_Monitor",
+    "bufferSize": 256,
+    "threadPoolSize": 4,
+    "logFilePath": "phase7_telemetry.log",
+    "sources": {
+        "RPi": {
+            "enabled": true,
+            "type": "VSOMEIP",
+            "parseRateMs": 500,
+            "sinks": [
+                "FILE"
+            ]
+        }
+    }
+}

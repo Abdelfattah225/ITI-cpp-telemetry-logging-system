@@ -1,0 +1,36 @@
+{
+    "appName": "Phase6_TelemetryLogger",
+    "bufferSize": 256,
+    "threadPoolSize": 4,
+    "logFilePath": "phase6_telemetry.log",
+    "sources": {
+        "CPU": {
+            "enabled": true,
+            "type": "FILE",
+            "path": "/proc/stat",
+            "parseRateMs": 500,
+            "sinks": [
+                "CONSOLE",
+                "FILE"
+            ]
+        },
+        "RAM": {
+            "enabled": true,
+            "type": "FILE",
+            "path": "/proc/meminfo",
+            "parseRateMs": 1000,
+            "sinks": [
+                "CONSOLE"
+            ]
+        },
+        "GPU": {
+            "enabled": false,
+            "type": "FILE",
+            "path": "/tmp/gpu_telemetry.txt",
+            "parseRateMs": 200,
+            "sinks": [
+                "FILE"
+            ]
+        }
+    }
+}
